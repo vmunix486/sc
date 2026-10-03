@@ -8,7 +8,8 @@ struct {
 	int inparentheses;
 	int inquotes;
 	int quotedchar;
-	char quotedstring[];
+/*	char quotedstring[];*/
+	char quotedstring[16384];
 } funcs;
 
 int main(int argc, char *argv[]) {
@@ -42,7 +43,7 @@ int main(int argc, char *argv[]) {
 				case 'p':
 					if (funcs.inquotes == 1) {
 						funcs.quotedstring[funcs.quotedchar] = 'p';
-						funcs.quotedchar += 1;
+						funcs.quotedchar++;
 					} else {
 						funcs.print = 1;
 #ifdef _DEBUG
@@ -56,6 +57,12 @@ int main(int argc, char *argv[]) {
 						puts("There is no statement that these parentheses are tied to.");
 						printf("Line: %s\n", line);
 						return 1;
+					} else if (funcs.inquotes == 1) {
+#ifdef _DEBUG
+						puts("Added '(' to string");
+#endif
+						funcs.quotedstring[funcs.quotedchar] = '(';
+						funcs.quotedchar++;
 					}
 
 					funcs.inparentheses = 1;
@@ -81,6 +88,8 @@ int main(int argc, char *argv[]) {
 						funcs.inquotes = 0;
 #ifdef _DEBUG
 						puts("Out of quotes");
+
+						printf("Length of funcs.quotedstring: %d", strlen(funcs.quotedstring));
 #endif
 						printf("%s", funcs.quotedstring);
 					}
@@ -88,9 +97,17 @@ int main(int argc, char *argv[]) {
 					break;
 				default:
 					if (funcs.inquotes == 1) {
+#ifdef _DEBUG
+						printf("Adding character to string: %c\n", c);
+#endif
 						funcs.quotedstring[funcs.quotedchar] = c;
-						funcs.quotedchar += 1;
+						funcs.quotedchar++;
+#ifdef _DEBUG
+						printf("String afterwards: %s\n", funcs.quotedstring);
+#endif
 					}
+
+					break;
 			}
 		}
 	}
