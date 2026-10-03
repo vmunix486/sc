@@ -6,7 +6,6 @@
 
 ## Functions
 
- - `n();` (newline)
  - `P();` (variable print) (no newline)
  - `f();` (for loop)
  - `w();` (while loop)
@@ -21,3 +20,4 @@ Other language functions
  - Time
  - Lists
  - External C libraries
+ - Escape characters (`\n`, `\t`, `\\`)
