@@ -1,6 +1,7 @@
 CC=gcc
 CFLAGS=-pedantic -Wall -Wextra -ansi -Ofast -flto
-#CPPFLAGS=-D_DEBUG
+#CPPFLAGS+=-D_DEBUG
+#CPPFLAGS+=-D_NO_MEMSET
 RM=rm
 RMFLAGS=-fv
 

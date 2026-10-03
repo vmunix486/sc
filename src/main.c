@@ -43,6 +43,9 @@ int main(int argc, char *argv[]) {
 	FILE  *filecontents;
 	char *line;  char c;
 	unsigned int   cnum;
+#ifdef _NO_MEMSET
+	size_t i;
+#endif
 
 	if (argc < 2) {
 		puts("Usage:");
@@ -119,11 +122,65 @@ int main(int argc, char *argv[]) {
 #ifdef _DEBUG
 						puts("Out of quotes");
 
-						printf("Length of funcs.quotedstring: %d", strlen(funcs.quotedstring));
+						printf("Length of funcs.quotedstring: %d\n", strlen(funcs.quotedstring));
 #endif
 						printf("%s", funcs.quotedstring);
+
+#ifdef _NO_MEMSET
+						for (i = 0; i < strlen(funcs.quotedstring); i++)
+							funcs.quotedstring[i] = 0;
+#else
+						memset(funcs.quotedstring, 0, strlen(funcs.quotedstring));
+#endif
+
+						funcs.quotedchar = 0;
 					}
 					
+					break;
+				case ')':
+					if (funcs.inquotes == 1) {
+						funcs.quotedstring[funcs.quotedchar] = ')';
+						funcs.quotedchar++;
+						break;
+					}
+
+
+					if (funcs.inparentheses == 1) {
+#ifdef _DEBUG
+						puts("Not in parenthesis anymore");
+#endif
+						funcs.inparentheses = 0;
+					} else {
+						puts("Closing parentheses closing nothing.");
+						printf("Line: %s\n", line);
+						return 1;
+					}
+
+					break;
+				case ';':
+					if (funcs.inquotes == 1) {
+#ifdef _DEBUG
+						puts("Added ; to string");
+#endif
+						funcs.quotedstring[funcs.quotedchar] = ';';
+						funcs.quotedchar++;
+					} else if (funcs.inquotes == 0 && funcs.inparentheses == 1) {
+						puts("Error: Random semicolon in parenthesis.");
+						printf("Line: %s\n", line);
+					} 
+
+					break;
+				case ' ':
+					if (funcs.inquotes == 1) {
+						funcs.quotedstring[funcs.quotedchar] = ' ';
+						funcs.quotedchar++;
+#ifdef _DEBUG
+						puts("Added space to string");
+#endif
+					}
+
+					break;
+				case '\n':
 					break;
 				default:
 					if (funcs.inquotes == 1) {
@@ -135,6 +192,10 @@ int main(int argc, char *argv[]) {
 #ifdef _DEBUG
 						printf("String afterwards: %s\n", funcs.quotedstring);
 #endif
+					} else {
+						puts("Error: Unrecognized character.");
+						printf("Line: %s\nCharacter: %c\n", line, c);
+						return 1;
 					}
 
 					break;
