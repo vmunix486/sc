@@ -3,13 +3,40 @@
 #include <stdlib.h> /* For malloc() */
 #include <string.h> /* For strlen() */
 
+/* The longest a printable string should be is 500 characters.
+ * You can change this here, but it should be enough. The only
+ * case you'd need to increase this is if you're printing entire
+ * bible. 							*/
+#define MAX_STRING_LEN 500
+
+/* This struct defines all functions that sc uses. This will grow
+ * along with features. */
 struct {
-	int print;
-	int inparentheses;
-	int inquotes;
-	int quotedchar;
-/*	char quotedstring[];*/
-	char quotedstring[16384];
+	int print; /* Whether or not it's in a print statement. */
+	int inparentheses; /* Whether it's in parenthesis () or not */
+	int inquotes; /* Whether it's in quotes "" or not */
+	int quotedchar; 
+	char quotedstring[MAX_STRING_LEN];
+	/* quotedchar and quotedstring[] both handle how strings work in sc.
+	 * 
+	 * Whenever it comes along a statement that needs a string, it checks
+	 * for quotes "", and that is stored inside of inquotes. If there are
+	 * quotes, then it is a string. So every character that is found while
+	 * inquotes = 1, gets added to the quotedstring array, which has a
+	 * default length of 500 characters. Every time it adds a character to
+	 * quotedstring[], it increments quotedchar by 1, so the string
+	 *
+	 * "Hello, World!"
+	 *
+	 * gets initialized as a string due to the quotes, then it adds the H to 
+	 * quotedstring[0], then quotedchar gets incremented to 1, so the next
+	 * character to get added to quotedstring would be e, which gets added to
+	 * quotedstring[1], of course.
+	 *
+	 * And that's how strings work so far in sc. 
+	 *
+	 * -vmunix 10/3/26
+	 */
 } funcs;
 
 int main(int argc, char *argv[]) {
@@ -29,6 +56,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
+	/* Opens the file */
 	if (fopen(argv[1], "r")) {
 		filecontents = fopen(argv[1], "r");
 	} else {
@@ -36,11 +64,13 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
+	/* Goes through the file one line at a time */
 	while (fgets(line, LINE_MAX + 1, filecontents) != NULL) {
+		/* Goes through the line one character at a time */
 		for (cnum = 0; cnum < strlen(line); cnum++) {
 			c = line[cnum];
 			switch (c) {
-				case 'p':
+				case 'p': /* print statement */
 					if (funcs.inquotes == 1) {
 						funcs.quotedstring[funcs.quotedchar] = 'p';
 						funcs.quotedchar++;
