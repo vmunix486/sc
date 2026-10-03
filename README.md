@@ -4,7 +4,7 @@
 
 The main gist of the language is that every function uses a single character, so as an example, printing "Hello, World!" can be achieved by doing
 ```
-p("Hello, World!);
+p("Hello, World!");
 ```
 
 The syntax of the language itself is similar to C/C++/Javascript, in how there are semicolons (;) after every statement.
