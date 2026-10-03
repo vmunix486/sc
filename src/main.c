@@ -12,9 +12,10 @@
 /* This struct defines all functions that sc uses. This will grow
  * along with features. */
 struct {
-	int print; /* Whether or not it's in a print statement. */
-	int inparentheses; /* Whether it's in parenthesis () or not */
-	int inquotes; /* Whether it's in quotes "" or not */
+	int print;         /* Whether or not it's in a print statement. */
+	int inparentheses; /* Whether it's in parenthesis () or not     */
+	int inquotes;      /* Whether it's in quotes "" or not          */
+	int escapechar;    /* Whether or not there is an initializing backslash for an escape character */
 	int quotedchar; 
 	char quotedstring[MAX_STRING_LEN];
 	/* quotedchar and quotedstring[] both handle how strings work in sc.
@@ -170,6 +171,44 @@ int main(int argc, char *argv[]) {
 					} 
 
 					break;
+				case '\\':
+					if (funcs.inquotes == 1) {
+#ifdef _DEBUG
+						puts("Backslash found, enabling escapechar variable");
+#endif
+						funcs.escapechar = 1;
+					} else if (funcs.escapechar == 1) {
+#ifdef _DEBUG
+						puts("Adding a backslash to the string (\\\\)");
+#endif
+						funcs.quotedstring[funcs.quotedchar] = '\\';
+						funcs.quotedchar++;
+					} else {
+						puts("Error: There's just a random backslash here:");
+						printf("Line: %s\n", line);
+						return 1;
+					}
+					break;
+				case 'n':
+					if (funcs.escapechar == 1) {
+#ifdef _DEBUG
+						puts("Newline (\\n) found. Putting in string");
+#endif
+						funcs.quotedstring[funcs.quotedchar] = '\n';
+						funcs.quotedchar++;
+						funcs.escapechar = 0;
+					} else if (funcs.inquotes == 1) {
+#ifdef _DEBUG
+						puts("Found an n not for a newline. Adding to string");
+#endif
+						funcs.quotedstring[funcs.quotedchar] = 'n';
+						funcs.quotedchar++;
+					} else {
+						puts("Error: There's just a random n here:");
+						printf("Line: %s\n", line);
+						return 1;
+					}
+					break;
 				case ' ':
 					if (funcs.inquotes == 1) {
 						funcs.quotedstring[funcs.quotedchar] = ' ';
@@ -184,6 +223,12 @@ int main(int argc, char *argv[]) {
 					break;
 				default:
 					if (funcs.inquotes == 1) {
+						
+						if (funcs.escapechar == 1) {
+							puts("Error: Unknown escape sequence");
+							printf("Line: %s\n", line);
+							return 1;
+						}
 #ifdef _DEBUG
 						printf("Adding character to string: %c\n", c);
 #endif
