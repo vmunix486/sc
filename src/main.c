@@ -9,6 +9,10 @@
  * bible. 							*/
 #define MAX_STRING_LEN 500
 
+/* Since booleans don't exist in C89 */
+#define true  1
+#define false 0
+
 /* This struct defines all functions that sc uses. This will grow
  * along with features. */
 struct {
@@ -75,23 +79,23 @@ int main(int argc, char *argv[]) {
 	c = line[cnum];
 	switch (c) {
 		case 'p': /* print statement */
-			if (funcs.inquotes == 1) {
+			if (funcs.inquotes == true) {
 				funcs.quotedstring[funcs.quotedchar] = 'p';
 				funcs.quotedchar++;
 			} else {
-				funcs.print = 1;
+				funcs.print = true;
 #ifdef _DEBUG
 				puts("In print statement");
 #endif
 				break;
 			}
 		case '(':
-			if (funcs.print != 1) {
+			if (funcs.print == false) {
 				puts("Error:");
 				puts("There is no statement that these parentheses are tied to.");
 				printf("Line: %s\n", line);
 				return 1;
-			} else if (funcs.inquotes == 1) {
+			} else if (funcs.inquotes == true) {
 #ifdef _DEBUG
 				puts("Added '(' to string");
 #endif
@@ -99,27 +103,27 @@ int main(int argc, char *argv[]) {
 				funcs.quotedchar++;
 			}
 
-			funcs.inparentheses = 1;
+			funcs.inparentheses = true;
 					
 #ifdef _DEBUG
 			puts("In parentheses");
 #endif
 			break;
 		case '"':
-			if (funcs.inparentheses != 1) {
+			if (funcs.inparentheses == false) {
 				puts("Error:");
 				puts("There are random parenthesis jusing hanging out");
 				printf("Line: %s\n", line);
 				return 1;
 			}
 				
-			if (funcs.inquotes == 0) {
-				funcs.inquotes = 1;
+			if (funcs.inquotes == false) {
+				funcs.inquotes = true;
 #ifdef _DEBUG
 				puts("In quotes");
 #endif
-			} else if (funcs.inquotes == 1) {
-				funcs.inquotes = 0;
+			} else if (funcs.inquotes == true) {
+				funcs.inquotes = false;
 #ifdef _DEBUG
 				puts("Out of quotes");
 				printf("Length of funcs.quotedstring: %d\n", strlen(funcs.quotedstring));
@@ -136,17 +140,17 @@ int main(int argc, char *argv[]) {
 					
 			break;
 		case ')':
-			if (funcs.inquotes == 1) {
+			if (funcs.inquotes == true) {
 				funcs.quotedstring[funcs.quotedchar] = ')';
 				funcs.quotedchar++;
 				break;
 			}
 
-			if (funcs.inparentheses == 1) {
+			if (funcs.inparentheses == true) {
 #ifdef _DEBUG
 				puts("Not in parenthesis anymore");
 #endif
-				funcs.inparentheses = 0;
+				funcs.inparentheses = false;
 			} else {
 				puts("Closing parentheses closing nothing.");
 				printf("Line: %s\n", line);
@@ -155,30 +159,32 @@ int main(int argc, char *argv[]) {
 
 			break;
 		case ';':
-			if (funcs.inquotes == 1) {
+			if (funcs.inquotes == true) {
 #ifdef _DEBUG
 				puts("Added ; to string");
 #endif
 				funcs.quotedstring[funcs.quotedchar] = ';';
 				funcs.quotedchar++;
-			} else if (funcs.inquotes == 0 && funcs.inparentheses == 1) {
+			} else if (funcs.inquotes      == false &&
+				   funcs.inparentheses == true) {
 				puts("Error: Random semicolon in parenthesis.");
 				printf("Line: %s\n", line);
 			} 
 
 			break;
 		case '\\':
-			if (funcs.inquotes == 1) {
+			if (funcs.inquotes == true && funcs.escapechar == false) {
 #ifdef _DEBUG
 				puts("Backslash found, enabling escapechar variable");
 #endif
-				funcs.escapechar = 1;
-			} else if (funcs.escapechar == 1) {
+				funcs.escapechar = true;
+			} else if (funcs.inquotes == true && funcs.escapechar == true) {
 #ifdef _DEBUG
 				puts("Adding a backslash to the string (\\\\)");
 #endif
 				funcs.quotedstring[funcs.quotedchar] = '\\';
 				funcs.quotedchar++;
+				funcs.escapechar = false;
 			} else {
 				puts("Error: There's just a random backslash here:");
 				printf("Line: %s\n", line);
@@ -186,14 +192,14 @@ int main(int argc, char *argv[]) {
 			}
 			break;
 		case 'n':
-			if (funcs.escapechar == 1) {
+			if (funcs.escapechar == true) {
 #ifdef _DEBUG
 				puts("Newline (\\n) found. Putting in string");
 #endif
 				funcs.quotedstring[funcs.quotedchar] = '\n';
 				funcs.quotedchar++;
-				funcs.escapechar = 0;
-			} else if (funcs.inquotes == 1) {
+				funcs.escapechar = false;
+			} else if (funcs.inquotes == true) {
 #ifdef _DEBUG
 				puts("Found an n not for a newline. Adding to string");
 #endif
@@ -205,8 +211,28 @@ int main(int argc, char *argv[]) {
 				return 1;
 			}
 			break;
+		case 't':
+			if (funcs.escapechar == true) {
+#ifdef _DEBUG
+				puts("Tab (\\t) found. Putting in string");
+#endif
+				funcs.quotedstring[funcs.quotedchar] = '\t';
+				funcs.quotedchar++;
+				funcs.escapechar = false;
+			} else if (funcs.inquotes == true) {
+#ifdef _DEBUG
+				puts("Found a t not for a tab. Adding to string.");
+#endif
+				funcs.quotedstring[funcs.quotedchar] = 't';
+				funcs.quotedchar++;
+			} else {
+				puts("Error: There's just a random t here:");
+				printf("Line: %s\n", line);
+				return 1;
+			}
+			break;
 		case ' ':
-			if (funcs.inquotes == 1) {
+			if (funcs.inquotes == true) {
 				funcs.quotedstring[funcs.quotedchar] = ' ';
 				funcs.quotedchar++;
 #ifdef _DEBUG
@@ -218,8 +244,8 @@ int main(int argc, char *argv[]) {
 		case '\n':
 			break;
 		default:
-			if (funcs.inquotes == 1) {
-				if (funcs.escapechar == 1) {
+			if (funcs.inquotes == true) {
+				if (funcs.escapechar == true) {
 					puts("Error: Unknown escape sequence");
 					printf("Line: %s\n", line);
 					return 1;

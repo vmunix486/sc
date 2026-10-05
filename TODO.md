@@ -19,7 +19,6 @@ Other language functions
  - Time
  - Lists
  - External C libraries
- - Escape characters (`\t`, `\\`)
  - Mathematical expressions (eg. `34 + 35`, `100/25`, `40-23`, `4*7`, `2^4`, and `20%2`)
  - More math stuff (eg. square roots, cube roots, variable roots)
  - Random functions (eg. random integers, picking random things from lists)
