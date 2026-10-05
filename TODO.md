@@ -20,4 +20,4 @@ Other language functions
  - Time
  - Lists
  - External C libraries
- - Escape characters (`\n`, `\t`, `\\`)
+ - Escape characters (`\t`, `\\`)
